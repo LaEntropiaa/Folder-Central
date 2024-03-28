@@ -19,9 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MainApp.h" />
     <ClInclude Include="RootFrame.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="MainApp.cpp" />
     <ClCompile Include="RootFrame.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
