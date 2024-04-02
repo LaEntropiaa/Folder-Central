@@ -6,9 +6,9 @@
 class RootFrame : public wxFrame
 {
 private:
-    void on_button_click(wxCommandEvent& evt);
-    void on_slider_move(wxCommandEvent& evt);
-    void on_text_change(wxCommandEvent& evt);
+    void on_any_button_click(wxCommandEvent& evt);
+    void on_button1_click(wxCommandEvent& evt);
+    void on_button2_click(wxCommandEvent& evt);
 public:
     RootFrame(const wxString& title);
 };
