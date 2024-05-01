@@ -6,10 +6,9 @@
 class RootFrame : public wxFrame
 {
 private:
-    void on_any_button_click(wxCommandEvent& evt);
-    void on_button1_click(wxCommandEvent& evt);
-    void on_button2_click(wxCommandEvent& evt);
+    void on_mouse_event(wxMouseEvent& evt);
 public:
+    int num = 0;
     RootFrame(const wxString& title);
 };
 
