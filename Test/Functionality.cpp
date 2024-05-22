@@ -46,13 +46,28 @@ void fcf::create_minimal_subroutine(std::string name, std::string origin, std::s
         std::filesystem::path new_directory = std::filesystem::absolute("../subroutines");
         std::filesystem::create_directory(new_directory);
     }
-    std::ofstream subroutine;
-    subroutine.open("../subroutines/" + name + ".txt");
-    subroutine << "FOLDER CENTRAL SUBROUTINE\n";
-    subroutine << name << "\n";
-    subroutine << origin << "\n";
-    subroutine << destiny << "\n";
-    subroutine.close();
+    std::ofstream subroutine_file;
+    int copy = 1;
+    std::string subroutine_path = "../subroutines/" + name + ".txt";
+    while (std::filesystem::exists(std::filesystem::path(subroutine_path)))
+    {
+        std::filesystem::path temp(subroutine_path);
+        std::string name = temp.filename().string();
+        size_t dot_position = name.find('.');
+        if (dot_position != std::string::npos)
+        {
+            name.insert(dot_position, '(' + std::to_string(copy) + ')');
+        }
+        temp.replace_filename(std::filesystem::path(name));
+        subroutine_path = temp.string();
+        copy++;
+    }
+    subroutine_file.open("../subroutines/" + name + ".txt");
+    subroutine_file << "FOLDER CENTRAL SUBROUTINE\n";
+    subroutine_file << name << "\n";
+    subroutine_file << origin << "\n";
+    subroutine_file << destiny << "\n";
+    subroutine_file.close();
 }
 
 
@@ -156,7 +171,7 @@ void fcf::execute_minimal_subroutine(std::string& path)
     }
 }
 
-std::vector<std::string> fcf::get_directory_subroutines(std::string& path)
+std::vector<std::string> fcf::get_directory_subroutines(std::string path)
 {
     path = fcf::raw_path(path);
     try
@@ -181,7 +196,8 @@ std::vector<std::string> fcf::get_directory_subroutines(std::string& path)
     for (const auto& entry : std::filesystem::directory_iterator(std::filesystem::path(path)))
     {
         std::string current_file = entry.path().string();
-        if (current_file.substr(current_file.length()).c_str() - 4 != ".txt")
+        std::cout << current_file.substr(current_file.length());
+        if (current_file.substr(current_file.length() - 4) != ".txt")
         {
             continue;
         }
@@ -192,7 +208,7 @@ std::vector<std::string> fcf::get_directory_subroutines(std::string& path)
         std::string line;
         std::ifstream file;
         std::vector<std::string> content;
-        file.open(path);
+        file.open(current_file);
         while (std::getline(file, line))
         {
             content.push_back(line);
@@ -201,7 +217,9 @@ std::vector<std::string> fcf::get_directory_subroutines(std::string& path)
         {
             continue;
         }
+        file.close();
         paths.push_back(current_file);
     }
+    std::sort(paths.begin(), paths.end());
     return paths;
 }

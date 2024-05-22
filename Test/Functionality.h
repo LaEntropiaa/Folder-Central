@@ -18,7 +18,7 @@ namespace fcf
     void create_subroutine(std::string origin, std::string destiny, std::vector<std::string> types,
                            std::pair<std::time_t, std::time_t> dates, std::vector<std::string> authors);
     void execute_minimal_subroutine(std::string& path);
-    std::vector<std::string> get_directory_subroutines(std::string& path);
+    std::vector<std::string> get_directory_subroutines(std::string path);
 }
 
 #endif
