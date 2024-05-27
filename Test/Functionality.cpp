@@ -1,4 +1,5 @@
 #include "Functionality.h"
+#pragma warning(disable : 4996)
 
 std::string fcf::raw_path(const std::string& str)
 {
@@ -19,6 +20,49 @@ std::string fcf::raw_path(const std::string& str)
         }
     }
     return raw_path;
+}
+
+
+std::string fcf::get_filetype(const std::string& str)
+{
+    std::size_t position = str.rfind('.');
+    if (position != std::string::npos) {
+        return str.substr(position);
+    }
+    return "";
+}
+
+
+std::string fcf::seconds_to_strdate(long long seconds)
+{
+    std::time_t time = seconds;
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&time), "%Y-%m-%d %X");
+    return ss.str();
+}
+
+
+long long fcf::strdate_to_seconds(const std::string& strdate)
+{
+    std::tm tm = {};
+    std::stringstream ss(strdate);
+    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+    try 
+    {
+        if (ss.fail())
+        {
+            std::stringstream mesage;
+            mesage << "Date could not be parsed\n" << "File: " << __FILE__ << "\n" << "Line: " << __LINE__ << "\n";
+            throw std::runtime_error(mesage.str());
+        }
+    }
+    catch (const std::runtime_error& e)
+    {
+        std::cerr << e.what() << "\n";
+        std::exit(EXIT_FAILURE);
+    }
+    std::time_t time = std::mktime(&tm);
+    return static_cast<long long>(time);
 }
 
 
@@ -71,13 +115,62 @@ void fcf::create_minimal_subroutine(std::string name, std::string origin, std::s
 }
 
 
-void fcf::create_subroutine(std::string origin, std::string destiny, std::vector<std::string> types,
-std::pair<std::time_t, std::time_t> dates, std::vector<std::string> authors)
+void fcf::create_subroutine(std::string name, std::string origin, std::string destiny, std::vector<std::string> types,
+std::pair<long long, long long> dates)
 {
-    
+    origin = fcf::raw_path(origin);
+    destiny = fcf::raw_path(destiny);
+    try
+    {
+        if (!(std::filesystem::exists(std::filesystem::path(origin)) && std::filesystem::exists(std::filesystem::path(destiny))))
+        {
+            std::stringstream mesage;
+            mesage << "Origin path not found or Destiny path not found\n" << "File: " << __FILE__ << "\n" << "Line: " << __LINE__ << "\n";
+            throw std::runtime_error(mesage.str());
+        }
+    }
+    catch (const std::runtime_error& e)
+    {
+        std::cerr << e.what() << "\n";
+        std::exit(EXIT_FAILURE);
+    }
+    if (!(std::filesystem::exists(std::filesystem::absolute(std::filesystem::path("../subroutines"))) &&
+        std::filesystem::is_directory(std::filesystem::absolute(std::filesystem::path("../subroutines")))))
+    {
+        std::filesystem::path new_directory = std::filesystem::absolute("../subroutines");
+        std::filesystem::create_directory(new_directory);
+    }
+    std::ofstream subroutine_file;
+    int copy = 1;
+    std::string subroutine_path = "../subroutines/" + name + ".txt";
+    while (std::filesystem::exists(std::filesystem::path(subroutine_path)))
+    {
+        std::filesystem::path temp(subroutine_path);
+        std::string name = temp.filename().string();
+        size_t dot_position = name.find('.');
+        if (dot_position != std::string::npos)
+        {
+            name.insert(dot_position, '(' + std::to_string(copy) + ')');
+        }
+        temp.replace_filename(std::filesystem::path(name));
+        subroutine_path = temp.string();
+        copy++;
+    }
+    subroutine_file.open("../subroutines/" + name + ".txt");
+    subroutine_file << "FOLDER CENTRAL SUBROUTINE\n";
+    subroutine_file << name << "\n";
+    subroutine_file << origin << "\n";
+    subroutine_file << destiny << "\n";
+    for (const std::string& entry : types)
+    {
+        subroutine_file << entry << ',';
+    }
+    subroutine_file << "\n";
+    subroutine_file << dates.first << ',' << dates.second;
+    subroutine_file.close();
 }
 
-void fcf::execute_minimal_subroutine(std::string& path)
+void fcf::execute_minimal_subroutine(std::string path)
 {
     std::string origin;
     std::string destiny;
@@ -85,26 +178,6 @@ void fcf::execute_minimal_subroutine(std::string& path)
     try 
     {
         if(std::filesystem::exists(std::filesystem::path(path)) && std::filesystem::is_regular_file(std::filesystem::path(path)))
-        {
-            ; //skip
-        }
-        else
-        {
-            std::stringstream mesage;
-            mesage << "Subroutine file not found\n" << "File: " << __FILE__ << "\n" << "Line: " << __LINE__ << "\n";
-            throw std::runtime_error(mesage.str());
-        }
-        if (std::filesystem::exists(std::filesystem::path(origin)) && std::filesystem::is_directory(std::filesystem::path(origin)))
-        {
-            ; //skip
-        }
-        else
-        {
-            std::stringstream mesage;
-            mesage << "Subroutine file not found\n" << "File: " << __FILE__ << "\n" << "Line: " << __LINE__ << "\n";
-            throw std::runtime_error(mesage.str());
-        }
-        if (std::filesystem::exists(std::filesystem::path(destiny)) && std::filesystem::is_directory(std::filesystem::path(destiny)))
         {
             ; //skip
         }
@@ -141,6 +214,26 @@ void fcf::execute_minimal_subroutine(std::string& path)
             mesage << "Path given is not a Subroutine\n" << "File: " << __FILE__ << "\n" << "Line: " << __LINE__ << "\n";
             throw std::runtime_error(mesage.str());
         }
+        if (std::filesystem::exists(std::filesystem::path(origin)) && std::filesystem::is_directory(std::filesystem::path(origin)))
+        {
+            ; //skip
+        }
+        else
+        {
+            std::stringstream mesage;
+            mesage << "Origin directory given doesn't exist\n" << "File: " << __FILE__ << "\n" << "Line: " << __LINE__ << "\n";
+            throw std::runtime_error(mesage.str());
+        }
+        if (std::filesystem::exists(std::filesystem::path(destiny)) && std::filesystem::is_directory(std::filesystem::path(destiny)))
+        {
+            ; //skip
+        }
+        else
+        {
+            std::stringstream mesage;
+            mesage << "Destiny directory given doesn't exist\n" << "File: " << __FILE__ << "\n" << "Line: " << __LINE__ << "\n";
+            throw std::runtime_error(mesage.str());
+        }
     }
     catch (const std::runtime_error& e)
     {
@@ -170,6 +263,113 @@ void fcf::execute_minimal_subroutine(std::string& path)
         std::filesystem::rename(std::filesystem::path(file_path), std::filesystem::path(new_path));
     }
 }
+
+
+void fcf::execute_subroutine(std::string path)
+{
+    std::string origin;
+    std::string destiny;
+    std::vector<std::string> types;
+    path = fcf::raw_path(path);
+    try
+    {
+        if (std::filesystem::exists(std::filesystem::path(path)) && std::filesystem::is_regular_file(std::filesystem::path(path)))
+        {
+            ; //skip
+        }
+        else
+        {
+            std::stringstream mesage;
+            mesage << "Subroutine file not found\n" << "File: " << __FILE__ << "\n" << "Line: " << __LINE__ << "\n";
+            throw std::runtime_error(mesage.str());
+        }
+    }
+    catch (const std::runtime_error& e)
+    {
+        std::cerr << e.what() << "\n";
+        std::exit(EXIT_FAILURE);
+    }
+    std::string line;
+    std::ifstream file;
+    std::vector<std::string> content;
+    file.open(path);
+    while (std::getline(file, line))
+    {
+        content.push_back(line);
+    }
+    try
+    {
+        if (content[0] == "FOLDER CENTRAL SUBROUTINE")
+        {
+            origin = content[2];
+            destiny = content[3];
+            std::string temp_str;
+            while (std::getline(std::stringstream(content[4]), temp_str, ','))
+            {
+                types.push_back(temp_str);
+            }
+        }
+        else
+        {
+            std::stringstream mesage;
+            mesage << "Path given is not a Subroutine\n" << "File: " << __FILE__ << "\n" << "Line: " << __LINE__ << "\n";
+            throw std::runtime_error(mesage.str());
+        }
+        if (std::filesystem::exists(std::filesystem::path(origin)) && std::filesystem::is_directory(std::filesystem::path(origin)))
+        {
+            ; //skip
+        }
+        else
+        {
+            std::stringstream mesage;
+            mesage << "Origin directory given doesn't exist\n" << "File: " << __FILE__ << "\n" << "Line: " << __LINE__ << "\n";
+            throw std::runtime_error(mesage.str());
+        }
+        if (std::filesystem::exists(std::filesystem::path(destiny)) && std::filesystem::is_directory(std::filesystem::path(destiny)))
+        {
+            ; //skip
+        }
+        else
+        {
+            std::stringstream mesage;
+            mesage << "Destiny directory given doesn't exist\n" << "File: " << __FILE__ << "\n" << "Line: " << __LINE__ << "\n";
+            throw std::runtime_error(mesage.str());
+        }
+    }
+    catch (const std::runtime_error& e)
+    {
+        std::cerr << e.what() << "\n";
+        std::exit(EXIT_FAILURE);
+    }
+    file.close();
+    for (const auto& entry : std::filesystem::directory_iterator(std::filesystem::path(origin)))
+    {
+        std::string file_path = entry.path().string();
+        std::string new_path = destiny + '/' + entry.path().filename().string();
+        int copy = 1;
+        //This technically could create a buch of files but only if you execute a subroutine a whole bunch of times, maybe i'll add some security later
+        while (std::filesystem::exists(std::filesystem::path(new_path)))
+        {
+            std::filesystem::path temp(new_path);
+            std::string name = temp.filename().string();
+            size_t dot_position = name.find('.');
+            if (dot_position != std::string::npos)
+            {
+                name.insert(dot_position, '(' + std::to_string(copy) + ')');
+            }
+            temp.replace_filename(std::filesystem::path(name));
+            new_path = temp.string();
+            copy++;
+        }
+        if (std::find(types.begin(), types.end(), fcf::get_filetype(file_path)) == types.end())
+        {
+            //if it iterates to the end of the vector that means the type of file is not in the list the subroutine specifies
+            continue;
+        }
+        std::filesystem::rename(std::filesystem::path(file_path), std::filesystem::path(new_path));
+    }
+}
+
 
 std::vector<std::string> fcf::get_directory_subroutines(std::string path)
 {
