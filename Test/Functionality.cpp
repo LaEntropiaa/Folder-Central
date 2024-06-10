@@ -116,7 +116,7 @@ void fcf::create_minimal_subroutine(std::string name, std::string origin, std::s
 
 
 void fcf::create_subroutine(std::string name, std::string origin, std::string destiny, std::vector<std::string> types,
-std::pair<long long, long long> dates)
+std::array<long long, 2> dates)
 {
     origin = fcf::raw_path(origin);
     destiny = fcf::raw_path(destiny);
@@ -166,7 +166,7 @@ std::pair<long long, long long> dates)
         subroutine_file << entry << ',';
     }
     subroutine_file << "\n";
-    subroutine_file << dates.first << ',' << dates.second;
+    subroutine_file << dates[0] << ',' << dates[1];
     subroutine_file.close();
 }
 
@@ -270,6 +270,7 @@ void fcf::execute_subroutine(std::string path)
     std::string origin;
     std::string destiny;
     std::vector<std::string> types;
+    std::array<long long, 2> dates;
     path = fcf::raw_path(path);
     try
     {
@@ -304,9 +305,18 @@ void fcf::execute_subroutine(std::string path)
             origin = content[2];
             destiny = content[3];
             std::string temp_str;
-            while (std::getline(std::stringstream(content[4]), temp_str, ','))
+            std::stringstream ss(content[4]);
+            while (std::getline(ss, temp_str, ','))
             {
                 types.push_back(temp_str);
+            }
+            ss = std::stringstream(content[5]);
+            for (int i = 0; i < 2; i++)
+            {
+                if (std::getline(ss, temp_str, ','))
+                {
+                    dates[i] = std::stoi(temp_str);
+                }
             }
         }
         else
@@ -346,6 +356,25 @@ void fcf::execute_subroutine(std::string path)
     {
         std::string file_path = entry.path().string();
         std::string new_path = destiny + '/' + entry.path().filename().string();
+        if (types.size() >= 1)
+        {
+            if (std::find(types.begin(), types.end(), fcf::get_filetype(file_path)) == types.end())
+            {
+                //if it iterates to the end of the vector that means the type of file is not in the list the subroutine specifies
+                continue;
+            }
+        }
+        if (!(dates.empty()))//not empty
+        {
+            auto fmod_time = std::filesystem::last_write_time(std::filesystem::path(file_path));
+            auto cmod_time = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+                fmod_time - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
+            std::time_t tmod_time = std::chrono::system_clock::to_time_t(cmod_time);
+            if (tmod_time <= dates[0] or tmod_time >= dates[1])
+            {
+                continue;
+            }
+        }
         int copy = 1;
         //This technically could create a buch of files but only if you execute a subroutine a whole bunch of times, maybe i'll add some security later
         while (std::filesystem::exists(std::filesystem::path(new_path)))
@@ -360,11 +389,6 @@ void fcf::execute_subroutine(std::string path)
             temp.replace_filename(std::filesystem::path(name));
             new_path = temp.string();
             copy++;
-        }
-        if (std::find(types.begin(), types.end(), fcf::get_filetype(file_path)) == types.end())
-        {
-            //if it iterates to the end of the vector that means the type of file is not in the list the subroutine specifies
-            continue;
         }
         std::filesystem::rename(std::filesystem::path(file_path), std::filesystem::path(new_path));
     }
@@ -415,6 +439,7 @@ std::vector<std::string> fcf::get_directory_subroutines(std::string path)
         }
         if (content[0] != "FOLDER CENTRAL SUBROUTINE")
         {
+            file.close();
             continue;
         }
         file.close();

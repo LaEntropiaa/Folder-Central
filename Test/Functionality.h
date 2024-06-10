@@ -11,6 +11,8 @@
 #include <filesystem>
 #include <stdexcept>
 #include <algorithm>
+#include <array>
+#include <iomanip>
 
 namespace fcf
 {
@@ -20,7 +22,7 @@ namespace fcf
     long long strdate_to_seconds(const std::string& datestr);
     void create_minimal_subroutine(std::string name, std::string origin, std::string destiny);
     void create_subroutine(std::string name, std::string origin, std::string destiny, std::vector<std::string> types,
-                           std::pair<long long, long long> dates);
+                           std::array<long long, 2> dates);
     void execute_minimal_subroutine(std::string path);
     void execute_subroutine(std::string path);
     std::vector<std::string> get_directory_subroutines(std::string path);
