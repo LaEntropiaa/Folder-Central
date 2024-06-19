@@ -21,12 +21,18 @@
     <ClInclude Include="MainApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Functionality.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RootFrame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MainApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Functionality.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
