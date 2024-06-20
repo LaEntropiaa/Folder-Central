@@ -22,11 +22,13 @@
     <ClInclude Include="Functionality.h" />
     <ClInclude Include="MainApp.h" />
     <ClInclude Include="RootFrame.h" />
+    <ClInclude Include="WindowDecoration.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Functionality.cpp" />
     <ClCompile Include="MainApp.cpp" />
     <ClCompile Include="RootFrame.cpp" />
+    <ClCompile Include="WindowDecoration.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

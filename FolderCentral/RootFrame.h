@@ -3,6 +3,7 @@
 
 #include <wx/wx.h>
 #include <wx/gbsizer.h>
+#include "WindowDecoration.h"
 
 class RootFrame : public wxFrame
 {
