@@ -10,7 +10,10 @@
 
 namespace fcw 
 {
+    void kill_all_children(wxPanel* panel);
     void decorate_left_panel(wxPanel* left_panel);
+    void add_folder(wxCommandEvent& event, wxWindow* root);
+    
 
 }
 

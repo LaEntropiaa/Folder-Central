@@ -19,6 +19,5 @@ RootFrame::RootFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
     sizer->Add(right_panel, 1, wxEXPAND | wxALL, 5);
 
     this->SetSizerAndFit(sizer);
-
 }
 
