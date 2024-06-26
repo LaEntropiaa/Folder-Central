@@ -98,7 +98,7 @@ void fcw::add_folder_window(wxCommandEvent& event, wxWindow* root, wxPanel* left
         });
 
     wxButton* search_button = new wxButton(panel, wxID_ANY, "Search", wxPoint(335, 55));
-    add_button->Bind(wxEVT_BUTTON, [dialog_frame, entry](wxCommandEvent& event)
+    search_button->Bind(wxEVT_BUTTON, [dialog_frame, entry](wxCommandEvent& event)
         {
             fcw::search_folder_path(event, dialog_frame, entry);
         });
@@ -138,4 +138,5 @@ void fcw::search_folder_path(wxCommandEvent& event, wxFrame* frame, wxTextCtrl* 
         wxString path = folder_dialog->GetPath();
         entry->SetValue(path);
     }
+    folder_dialog->Destroy();
 }
