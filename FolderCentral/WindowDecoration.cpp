@@ -94,7 +94,7 @@ void fcw::add_folder_window(wxCommandEvent& event, wxWindow* root, wxPanel* left
     wxButton* add_button = new wxButton(panel, wxID_ANY, "Add", wxPoint(20, 55));
     add_button->Bind(wxEVT_BUTTON, [status, entry, left_panel](wxCommandEvent& event)
         {
-            fcw::add_folder_button(event, status, entry, left_panel);
+            fcw::save_folder(event, status, entry, left_panel);
         });
 
     wxButton* search_button = new wxButton(panel, wxID_ANY, "Search", wxPoint(335, 55));
@@ -107,7 +107,7 @@ void fcw::add_folder_window(wxCommandEvent& event, wxWindow* root, wxPanel* left
     dialog_frame->Show();
 }
 
-void fcw::add_folder_button(wxCommandEvent& event, wxStatusBar* status, wxTextCtrl* entry, wxPanel* left_panel)
+void fcw::save_folder(wxCommandEvent& event, wxStatusBar* status, wxTextCtrl* entry, wxPanel* left_panel)
 {
     std::string path = entry->GetValue().ToStdString();
     std::filesystem::path new_folder(fcf::raw_path(path));
@@ -139,4 +139,10 @@ void fcw::search_folder_path(wxCommandEvent& event, wxFrame* frame, wxTextCtrl* 
         entry->SetValue(path);
     }
     folder_dialog->Destroy();
+}
+
+
+void fcw::decorate_right_panel(wxCommandEvent& event, wxPanel* right_panel, wxString folder_path)
+{
+
 }
