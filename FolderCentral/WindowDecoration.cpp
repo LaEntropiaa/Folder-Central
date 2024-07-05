@@ -12,7 +12,7 @@ void fcw::kill_all_children(wxPanel* panel)
 }
 
 
-void fcw::decorate_left_panel(wxPanel* left_panel)
+void fcw::decorate_left_panel(wxPanel* left_panel, wxPanel* right_panel)
 {
     left_panel->SetBackgroundColour(wxColor(38, 113, 15));
     wxSizer* panel_sizer = new wxBoxSizer(wxVERTICAL);
@@ -42,7 +42,11 @@ void fcw::decorate_left_panel(wxPanel* left_panel)
         directories.push_back(line);
     }
     //Get the right panel without passing the right panel directly
-    wxPanel* right_panel = nullptr;
+    if (!right_panel)
+    {
+        wxLogError("Right panel is null!");
+        return;
+    }
     for (std::string directory : directories)
     {
         if (directory.empty())
@@ -61,9 +65,9 @@ void fcw::decorate_left_panel(wxPanel* left_panel)
 
     wxWindow* root = left_panel->GetParent();
     wxButton* new_folder_button = new wxButton(left_panel, wxID_ANY, "+", wxDefaultPosition, wxSize(250, 40));
-    new_folder_button->Bind(wxEVT_BUTTON, [root, left_panel](wxCommandEvent& event)
+    new_folder_button->Bind(wxEVT_BUTTON, [root, left_panel, right_panel](wxCommandEvent& event)
         {
-            fcw::add_folder_window(event, root, left_panel);
+            fcw::add_folder_window(event, root, left_panel, right_panel);
         });
     panel_sizer->Add(new_folder_button, 0, wxEXPAND | wxALL, 0);
 
@@ -72,7 +76,7 @@ void fcw::decorate_left_panel(wxPanel* left_panel)
 }
 
 
-void fcw::add_folder_window(wxCommandEvent& event, wxWindow* root, wxPanel* left_panel)
+void fcw::add_folder_window(wxCommandEvent& event, wxWindow* root, wxPanel* left_panel, wxPanel* right_panel)
 {
     wxWindowList children = root->GetChildren();
     for (wxWindowList::iterator it = children.begin(); it != children.end(); ++it)
@@ -98,9 +102,9 @@ void fcw::add_folder_window(wxCommandEvent& event, wxWindow* root, wxPanel* left
     entry->SetMaxLength(100);
 
     wxButton* add_button = new wxButton(panel, wxID_ANY, "Add", wxPoint(20, 55));
-    add_button->Bind(wxEVT_BUTTON, [status, entry, left_panel](wxCommandEvent& event)
+    add_button->Bind(wxEVT_BUTTON, [status, entry, left_panel, right_panel](wxCommandEvent& event)
         {
-            fcw::save_folder(event, status, entry, left_panel);
+            fcw::save_folder(event, status, entry, left_panel, right_panel);
         });
 
     wxButton* search_button = new wxButton(panel, wxID_ANY, "Search", wxPoint(335, 55));
@@ -113,7 +117,7 @@ void fcw::add_folder_window(wxCommandEvent& event, wxWindow* root, wxPanel* left
     dialog_frame->Show();
 }
 
-void fcw::save_folder(wxCommandEvent& event, wxStatusBar* status, wxTextCtrl* entry, wxPanel* left_panel)
+void fcw::save_folder(wxCommandEvent& event, wxStatusBar* status, wxTextCtrl* entry, wxPanel* left_panel, wxPanel* right_panel)
 {
     std::string path = entry->GetValue().ToStdString();
     std::filesystem::path new_folder(fcf::raw_path(path));
@@ -131,7 +135,7 @@ void fcw::save_folder(wxCommandEvent& event, wxStatusBar* status, wxTextCtrl* en
 
     left_panel->Freeze();
     left_panel->DestroyChildren();
-    fcw::decorate_left_panel(left_panel);
+    fcw::decorate_left_panel(left_panel, right_panel);
     entry->Clear();
     left_panel->Layout();
     left_panel->Thaw();
@@ -162,6 +166,7 @@ void fcw::decorate_right_panel(wxCommandEvent& event, wxPanel* right_panel, wxSt
         return;
     }
     right_panel->Freeze();  
-    right_panel->DestroyChildren();  
+    right_panel->DestroyChildren();
+    right_panel->SetBackgroundColour(wxColour(200, 50, 100));
     right_panel->Thaw();
 }
