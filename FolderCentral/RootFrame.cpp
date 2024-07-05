@@ -7,11 +7,11 @@ RootFrame::RootFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title)
     //RootFrame config
     SetMinSize(wxSize(800, 600));
 
-    wxPanel* left_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(250, 600));
+    wxPanel* left_panel = new wxPanel(this, 41, wxDefaultPosition, wxSize(250, 600), 2621440L, wxString("left_panel"));
     left_panel->SetBackgroundColour(wxColor(38, 113, 15));
     fcw::decorate_left_panel(left_panel);
 
-    wxPanel* right_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(550, 600));
+    wxPanel* right_panel = new wxPanel(this, 400, wxDefaultPosition, wxSize(550, 600), 2621440L, wxString("right_panel"));
     right_panel->SetBackgroundColour(wxColor(254, 111, 71));
 
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);

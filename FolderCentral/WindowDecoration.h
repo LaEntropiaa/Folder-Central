@@ -7,6 +7,7 @@
 #include <sstream>
 #include <vector>
 #include "Functionality.h"
+#include "RootFrame.h"
 
 namespace fcw 
 {
