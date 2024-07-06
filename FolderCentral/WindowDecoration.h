@@ -2,6 +2,7 @@
 #define WINDOWDECORATION_H
 
 #include <wx/wx.h>
+#include <wx/wrapsizer.h>
 #include <string>
 #include <filesystem>
 #include <sstream>

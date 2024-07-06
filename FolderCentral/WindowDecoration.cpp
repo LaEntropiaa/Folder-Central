@@ -42,11 +42,6 @@ void fcw::decorate_left_panel(wxPanel* left_panel, wxPanel* right_panel)
         directories.push_back(line);
     }
     //Get the right panel without passing the right panel directly
-    if (!right_panel)
-    {
-        wxLogError("Right panel is null!");
-        return;
-    }
     for (std::string directory : directories)
     {
         if (directory.empty())
@@ -167,6 +162,18 @@ void fcw::decorate_right_panel(wxCommandEvent& event, wxPanel* right_panel, wxSt
     }
     right_panel->Freeze();  
     right_panel->DestroyChildren();
-    right_panel->SetBackgroundColour(wxColour(200, 50, 100));
+    right_panel->SetBackgroundColour(wxColour(100, 220, 100));
+    
+    wxWrapSizer* sizer = new wxWrapSizer(wxHORIZONTAL);
+    right_panel->SetSizer(sizer);
+    std::vector<std::string> subroutine_paths = fcf::get_directory_subroutines(folder_path.ToStdString());
+    for (std::string path : subroutine_paths)
+    {
+        wxButton* button = new wxButton(right_panel, wxID_ANY, "boton", wxDefaultPosition, wxSize(90, 90), 0L, wxDefaultValidator, wxString(path));
+        sizer->Add(button, 0, wxALL, 5);
+    }
+    right_panel->Layout();
     right_panel->Thaw();
+    right_panel->Refresh();
+    right_panel->Update();
 }

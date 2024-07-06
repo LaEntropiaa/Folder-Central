@@ -421,7 +421,6 @@ std::vector<std::string> fcf::get_directory_subroutines(std::string path)
     for (const auto& entry : std::filesystem::directory_iterator(std::filesystem::path(path)))
     {
         std::string current_file = entry.path().string();
-        std::cout << current_file.substr(current_file.length());
         if (current_file.substr(current_file.length() - 4) != ".txt")
         {
             continue;
