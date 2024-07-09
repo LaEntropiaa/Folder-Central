@@ -116,7 +116,7 @@ void fcf::create_minimal_subroutine(std::string name, std::string origin, std::s
 
 
 void fcf::create_subroutine(std::string name, std::string origin, std::string destiny, std::vector<std::string> types,
-std::array<long long, 2> dates)
+std::array<long long, 2> dates, std::string folder)
 {
     origin = fcf::raw_path(origin);
     destiny = fcf::raw_path(destiny);
@@ -156,7 +156,7 @@ std::array<long long, 2> dates)
         subroutine_path = temp.string();
         copy++;
     }
-    subroutine_file.open("../subroutines/" + name + ".txt");
+    subroutine_file.open(folder + name + ".txt");
     subroutine_file << "FOLDER CENTRAL SUBROUTINE\n";
     subroutine_file << name << "\n";
     subroutine_file << origin << "\n";

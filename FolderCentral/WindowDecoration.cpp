@@ -166,14 +166,64 @@ void fcw::decorate_right_panel(wxCommandEvent& event, wxPanel* right_panel, wxSt
     
     wxWrapSizer* sizer = new wxWrapSizer(wxHORIZONTAL);
     right_panel->SetSizer(sizer);
+
     std::vector<std::string> subroutine_paths = fcf::get_directory_subroutines(folder_path.ToStdString());
     for (std::string path : subroutine_paths)
     {
-        wxButton* button = new wxButton(right_panel, wxID_ANY, "boton", wxDefaultPosition, wxSize(90, 90), 0L, wxDefaultValidator, wxString(path));
+        std::string name = std::filesystem::path(path).filename().string();
+        name = name.substr(0, name.length() - 4);
+        wxButton* button = new wxButton(right_panel, wxID_ANY, name, wxDefaultPosition, wxSize(90, 90), 0L, wxDefaultValidator);
+        button->Bind(wxEVT_BUTTON, [path](wxCommandEvent& event)
+            {
+                fcw::subroutine_button(event, path);
+            });
         sizer->Add(button, 0, wxALL, 5);
     }
+
+    std::string directory = folder_path.ToStdString();
+    wxWindow* root = right_panel->GetParent();
+    wxButton* add_subroutine_button = new wxButton(right_panel, wxID_ANY, "+", wxDefaultPosition, wxSize(90, 90));
+    add_subroutine_button->Bind(wxEVT_BUTTON, [right_panel, directory](wxCommandEvent& event)
+        {
+            fcw::create_subroutine_window(event, right_panel, directory);
+        });
+    sizer->Add(add_subroutine_button, 0, wxALL, 5);
+
     right_panel->Layout();
     right_panel->Thaw();
     right_panel->Refresh();
     right_panel->Update();
+}
+
+
+void fcw::subroutine_button(wxCommandEvent& event, std::string subroutine_path)
+{
+    wxMessageDialog* confirmation_dialog = new wxMessageDialog(NULL, wxString("Are you sure you want to execute this subroutine?"), "Confirm", wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
+    if (confirmation_dialog->ShowModal() == wxID_YES)
+    {
+        fcf::execute_subroutine(subroutine_path);
+        wxLogMessage("Subroutine executed!");
+    }
+}
+
+
+void fcw::create_subroutine_window(wxCommandEvent& event, wxPanel* right_panel, std::string folder_path)
+{
+    wxWindowList children = right_panel->GetChildren();
+    for (wxWindowList::iterator it = children.begin(); it != children.end(); ++it)
+    {
+        wxFrame* frame = dynamic_cast<wxFrame*>(*it);
+        if (frame)
+        {
+            frame->Destroy();
+        }
+    }
+
+    wxFrame* dialog_frame = new wxFrame(right_panel, wxID_ANY, "Create a new subroutine");
+    dialog_frame->SetMinSize(wxSize(400, 600));
+    dialog_frame->SetMaxSize(wxSize(400, 600));
+
+    //dialog_frame->CentreOnParent();
+    dialog_frame->SetPosition(wxGetMousePosition());
+    dialog_frame->Show();
 }
